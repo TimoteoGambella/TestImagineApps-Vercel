@@ -35,7 +35,6 @@ export default function Login(){
             }
         })
     }
-    checkUser({email:"timi.gambella@hotmail.com",password:"timoG"}).then((res)=>navigate("/home"))
 
     return(
         <div className="login-container">

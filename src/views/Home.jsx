@@ -3,12 +3,15 @@ import { UseAppContext } from "../context/Context"
 import { useEffect } from "react"
 import CrearEmpresas from "../components/CrearEmpresas"
 import AgregarProducto from "../components/AgregarProducto"
+import Swal from "sweetalert2"
 
 export default function Home(){
-    const {userLogin,deleteObj,sendMail}=useContext(UseAppContext)
+    const {userLogin,deleteObj,sendMail,allProds}=useContext(UseAppContext)
 
     const [popUpKey,setPopUpKey]=useState("")
     const [popUpKey2,setPopUpKey2]=useState("")
+
+    const [popUpKeyProd2,setPopUpKeyProd2]=useState("")
 
     useEffect(() => {
         if(userLogin===""){
@@ -16,15 +19,43 @@ export default function Home(){
         }
     }, [userLogin])
 
-    const handleDelete=async(empresa)=>{
-        let newArray= []
-        for (const key in userLogin.empresas) {
-            if (Number(key)!==empresa) {
-                newArray.push(userLogin.empresas[key])
+    const handleDelete=async(empresa,prod)=>{
+        await Swal.fire({
+            title: '¿Eliminar empresa/producto?',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'YES',
+            denyButtonText: `NO`,
+          }).then(async(result) => {
+            if (result.isDenied || result.isDismissed) {
+              return
+            }else{
+                let newArray= []
+                let newProds=[]
+        
+                let newArray2=userLogin
+                if(prod!==undefined){
+                    newArray=userLogin.empresas[empresa]
+                    for (const key in userLogin.empresas[empresa].productos) {
+                        if (Number(key)!==prod) {
+                            newProds.push(userLogin.empresas[empresa].productos[key])
+                        }
+                    }
+                    newArray.productos=newProds
+                    newArray2.empresas[empresa]=newArray
+                    await deleteObj(newArray2.empresas)
+                }else{
+                    for (const key in userLogin.empresas) {
+                        if (Number(key)!==empresa) {
+                            newArray.push(userLogin.empresas[key])
+                        }
+                    }
+                    await deleteObj(newArray)
+                }
+                alert(prod!==undefined?"PRODUCTO ELIMINADO":"EMPRESA ELIMINADA")
             }
-        }
-        await deleteObj(newArray)
-        alert("EMPRESA ELIMINADA")
+          })
+
     }
     
     const handleDownload=()=>{
@@ -41,8 +72,8 @@ export default function Home(){
                             <CrearEmpresas/>
                         }
                     </div>
-                    {userLogin.admin && userLogin.empresas.length!==0 && <p>Tus empresas</p>}
-                    {userLogin.admin && userLogin.empresas.length===0 ? <p>NO TIENE EMPRESAS</p> :
+                    {userLogin.admin && userLogin.empresas.length!==0 && <p style={{fontSize:"35px"}}>Tus empresas</p>}
+                    {userLogin.admin && userLogin.empresas.length===0 ? <p>NO TIENES EMPRESAS</p> :
                         <div className="editar">
                             {userLogin.empresas.map((obj,i)=>{
                                 return(
@@ -55,12 +86,14 @@ export default function Home(){
                                                 <p onClick={()=>setPopUpKey2(i)}>AGREGAR PRODUCTO</p>
                                             </div>
                                         </div>
-                                        <div className="prods">
-                                            {obj.productos.map((obj,i)=>{
+                                        <div className="listaProductos">
+                                            {obj.productos.map((obj,ii)=>{
                                                 return(
-                                                    <div key={i}>
+                                                    <div key={ii} style={{display:"flex",justifyContent:"space-between"}}>
                                                         {obj.nombre}
                                                         <img src={obj.img} alt="IMG" />
+                                                        <p onClick={()=>handleDelete(i,ii)}>ELIMINAR</p>
+                                                        <p onClick={()=>{setPopUpKey2(i);setPopUpKeyProd2(ii)}}>EDITAR</p>
                                                     </div>
                                                 )
                                             })}
@@ -76,12 +109,27 @@ export default function Home(){
                             })}
                         </div>
                     }
+                    <p style={{fontSize:"35px",marginTop:"60px"}}>TODOS los productos</p>
+                    <div className="listaProductos">
+                        {allProds.map((obj,i)=>{
+                            return(
+                                <div key={i}>
+                                    <p>{obj.nombre}</p>
+                                    <p>${obj.precio}</p>
+                                    <p>Cantidad: {obj.cantidad}</p>
+                                    <p>Descripcion: {obj.descripcion}</p>
+                                    
+                                    <img src={obj.img} alt="IMG" />
+                                </div>
+                            )
+                        })}
+                    </div>
                 </div>
             }
             {popUpKey!=="" &&
                 <div className="popUp">
                     <div className="edit">
-                        <CrearEmpresas dataEdit={userLogin.empresas[popUpKey]} popUpKey={popUpKey}/>
+                        <CrearEmpresas setPopUpKey={setPopUpKey} dataEdit={userLogin.empresas[popUpKey]} popUpKey={popUpKey}/>
                     </div>
                     <div className="fondo" onClick={()=>setPopUpKey("")}></div>
                 </div>
@@ -89,9 +137,16 @@ export default function Home(){
             {popUpKey2!=="" &&
                 <div className="popUp">
                     <div className="edit">
-                        <AgregarProducto empresa={userLogin.empresas[popUpKey2]} popUpKey={popUpKey2}/>
+                        <AgregarProducto setPopUpKey={setPopUpKey2} setPopUpKeyProd2={setPopUpKeyProd2} popUpKeyProd2={popUpKeyProd2} dataEdit={userLogin.empresas[popUpKey2].productos[popUpKeyProd2]} empresa={userLogin.empresas[popUpKey2]} popUpKey={popUpKey2}/>
                     </div>
-                    <div className="fondo" onClick={()=>setPopUpKey2("")}></div>
+                    <div className="fondo" onClick={()=>{
+                        setPopUpKey2("")
+                        setPopUpKeyProd2("")
+                        document.getElementById("nombre").value=""
+                        document.getElementById("cantidad").value=""
+                        document.getElementById("precio").value=""
+                        document.getElementById("descripcion").value=""
+                    }}></div>
                 </div>
             }
         </>

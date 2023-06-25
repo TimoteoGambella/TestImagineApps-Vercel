@@ -1,4 +1,4 @@
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { initializeApp } from "firebase/app";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { getFirestore, getDocs, query, collection, where, addDoc, doc, setDoc } from 'firebase/firestore';
@@ -23,6 +23,24 @@ export const storage = getStorage(app)
 export default function AppContext({children}){
 
     const [userLogin,setUserLogin]=useState("")
+    const [allProds,setAllProds]=useState([])
+
+    useEffect(() => {
+        getAllProds()
+    }, [])
+
+    const getAllProds=async()=>{
+        const collectionsData = await getDocs(query(collection(db, "users")));
+        let array = []
+        for (const key in collectionsData.docs) {
+            for (const key2 in collectionsData.docs[key].data().empresas) {
+                for (const key3 in collectionsData.docs[key].data().empresas[key2].productos) {
+                    array.push(collectionsData.docs[key].data().empresas[key2].productos[key3])
+                }
+            }
+        }
+        setAllProds(array)
+    }
 
     const checkUser=async(data)=>{
         const collectionsData = await getDocs(query(collection(db, "users"), where("email","==",data.email)));
@@ -65,12 +83,14 @@ export default function AppContext({children}){
 
             await setDoc(user, { empresas: newArrayEmpresas }, { merge: true })
 
+            getAllProds()
             return {status:"success", message:"add"}
         }else{
     
             await setDoc(user, { empresas: data }, { merge: true })
             setUserLogin({...userLogin, empresas:data})
-    
+            
+            getAllProds()
             return {status:"success", message:"add"}
         }
     }
@@ -82,6 +102,7 @@ export default function AppContext({children}){
 
         await setDoc(user, { empresas: data }, { merge: true })
 
+        getAllProds()
         return {status:"success", message:"delete"}
     }
 
@@ -89,6 +110,7 @@ export default function AppContext({children}){
         
         const fotosProds = ref(storage, `${data.nombre}${data.id}`);
         await uploadBytes(fotosProds,data.img);
+        getAllProds()
         return await getDownloadURL(ref(storage,`${data.nombre}${data.id}`))
     }
 
@@ -107,7 +129,7 @@ export default function AppContext({children}){
         )
     }
     return(
-        <UseAppContext.Provider value={{ checkUser, addObj, deleteObj, sendMail, userLogin }}>
+        <UseAppContext.Provider value={{ checkUser, addObj, deleteObj, sendMail, userLogin, allProds }}>
             {children}
         </UseAppContext.Provider>
     )

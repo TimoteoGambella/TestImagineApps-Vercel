@@ -52,6 +52,7 @@
     align-items: center;
     flex-direction: column;
     gap: 40px;
+    padding-bottom: 100px;
     .editar{
         width: 100%;
         p{
@@ -81,22 +82,6 @@
                     }
                 }
             }
-            .prods{
-                margin: auto;
-                display: flex;
-                flex-direction: column;
-                width: 90%;
-                justify-content: space-between;
-                div{
-                    border-bottom: 2px solid black;
-                    margin-bottom: 30px;
-                    padding: 5px;
-                    img{
-                        width: 50px;
-                        height: 50px;
-                    }
-                }
-            }
             .inventario{
                 margin: 10px auto;
                 padding: 5px 10px;
@@ -106,6 +91,22 @@
                 &:hover{
                     transform: scale(1.2);
                 }
+            }
+        }
+    }
+    .listaProductos{
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        width: 90%;
+        justify-content: space-between;
+        div{
+            border-bottom: 2px solid black;
+            margin-bottom: 30px;
+            padding: 5px;
+            img{
+                width: 50px;
+                height: 50px;
             }
         }
     }

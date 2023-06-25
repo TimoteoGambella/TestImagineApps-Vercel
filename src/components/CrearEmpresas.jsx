@@ -1,8 +1,9 @@
 import { useContext, useEffect, useState } from "react"
 import validarNIT from 'validar-nit-gt'
 import { UseAppContext } from "../context/Context"
+import loader from "../assets/200w.gif"
 
-export default function CrearEmpresas({dataEdit,popUpKey}){
+export default function CrearEmpresas({dataEdit,popUpKey,setPopUpKey}){
 
     const {addObj,userLogin}=useContext(UseAppContext)
 
@@ -13,6 +14,7 @@ export default function CrearEmpresas({dataEdit,popUpKey}){
         telefono:"",
         productos:[]
     })
+    const [sendForm,setSendForm]=useState(false)
 
     useEffect(() => {
         if(dataEdit!==undefined){
@@ -27,14 +29,17 @@ export default function CrearEmpresas({dataEdit,popUpKey}){
 
     const handleSubmit=async(e)=>{
         e.preventDefault()
+        setSendForm(true)
 
         if(dataEmpresa.nombre==="" || dataEmpresa.nit==="" || dataEmpresa.direccion==="" || dataEmpresa.telefono===""){
             alert("COMPLETE LOS CAMPOS")
+            setSendForm(false)
             return
         }
         
         if(!validarNIT(dataEmpresa.nit) && !validarNIT(dataEmpresa.nit, {limpiar: true}).resultado){
             alert("FORMATO DE NIT INVALIDO")
+            setSendForm(false)
             return
         }
 
@@ -50,6 +55,13 @@ export default function CrearEmpresas({dataEdit,popUpKey}){
 
             alert("Empresa editada")
         }
+
+        document.getElementById("nombre").value=""
+        document.getElementById("direccion").value=""
+        document.getElementById("nit").value=""
+        document.getElementById("telefono").value=""
+        setSendForm(false)
+        setPopUpKey("")
     }
 
     return(
@@ -83,7 +95,11 @@ export default function CrearEmpresas({dataEdit,popUpKey}){
                 onChange={(e)=>updateData(e.target.id,e.target.value)}
             />
 
-            <button>{dataEdit===undefined?"Crear Empresa":"Editar Empresa"}</button>
+            {sendForm ? 
+                <img src={loader} alt="LOAD" />
+                :
+                <button>{dataEdit===undefined?"Crear Empresa":"Editar Empresa"}</button>
+            }
         </form>
     )
 }

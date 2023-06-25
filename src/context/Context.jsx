@@ -57,8 +57,13 @@ export default function AppContext({children}){
                 return({status:"success", message:"newUser",data:{id:newUser.id,data:user}})
             }
         }else{
-            setUserLogin({...collectionsData.docs[0].data(),id:collectionsData.docs[0].id})
-            return {status:"success", message:"login", id: collectionsData.docs[0].id, data:collectionsData.docs[0].data()}
+            if(collectionsData.docs[0].data().password===data.password){
+                setUserLogin({...collectionsData.docs[0].data(),id:collectionsData.docs[0].id})
+                return {status:"success", message:"login", id: collectionsData.docs[0].id, data:collectionsData.docs[0].data()}
+            }else{
+                alert("CONTRASEÑA INCORRECTA")
+                return {status:"fail", message:"login"}
+            }
         }
     }
 

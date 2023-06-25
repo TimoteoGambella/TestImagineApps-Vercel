@@ -38,6 +38,13 @@ export default function Login(){
 
     return(
         <div className="login-container">
+            <div className="aclaraciones">
+                <h1>Aclaraciones</h1>
+                <p>1- Si el usuario NO existe, se crea automaticamente y te loguea. Se loguea con modalidad "Externo".</p>
+                <p>2- Usuario administrador: timi.gambella@hotmail.com - timoG</p>
+                <p>3- Debido al tiempo tiempo disponible, No esta aprovechado al 100% los componentes y el CSS.</p>
+                <p>4- Ya existen productos y empresas cargadas de "prueba"</p>
+            </div>
             <div className="contenedor">
                 <form onSubmit={(e)=>handleSubmit(e)}>
                     <input type="email" placeholder="Email" onChangeCapture={(e)=>{
